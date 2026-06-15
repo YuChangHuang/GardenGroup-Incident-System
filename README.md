@@ -2,7 +2,7 @@
 
 An IT service-desk / incident-ticketing web app for the fictional *Garden Group*, built with **ASP.NET Core MVC (.NET 8)** and **MongoDB**. Employees report incidents, the service desk triages and hands over tickets, and supervisors track everything from a dashboard with statistics and archiving.
 
-> Originally a four-person team project for a Fontys ICT NoSQL course. This version has been reworked so anyone can clone it and run it locally — the original MongoDB Atlas cloud database has been replaced with a dockerised MongoDB plus seed data, and leaked credentials were removed.
+> Originally a four-person team project for an Inholland University NoSQL course. This version has been reworked so anyone can clone it and run it locally — the original MongoDB Atlas cloud database has been replaced with a dockerised MongoDB plus seed data, and leaked credentials were removed.
 
 ## Screenshots
 
@@ -78,7 +78,7 @@ I also did the work to make this repository runnable locally (dockerised MongoDB
 
 ## Team & acknowledgements
 
-Garden Group Incident System was built by a four-person student team for a Fontys ICT course. Original feature work:
+Garden Group Incident System was built by a four-person student team for an Inholland University course. Original feature work:
 
 - **Gabriele Amorosi** — ticket sorting by priority
 - **Puok Kamler** — ticket filtering by keyword
