@@ -1,0 +1,31 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: gardengroup-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: GardenGrup
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      # Seed scripts run automatically the first time the container starts
+      # (while the data volume is empty), in the GardenGrup database.
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+
+  # Optional web GUI for browsing the database at http://localhost:8081
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: gardengroup-mongo-express
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+
+volumes:
+  mongo-data:

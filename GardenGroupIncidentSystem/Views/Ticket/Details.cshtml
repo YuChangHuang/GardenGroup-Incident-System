@@ -1,0 +1,120 @@
+﻿@model GardenGroupIncidentSystem.Models.Ticket
+@{
+    ViewData["Title"] = "Ticket Details";
+    var loggedInUser = Context.Session.GetObject<Employee>("LoggedInUser");
+
+    if (loggedInUser?.EmployeeRole == Role.regular)
+    {
+        Layout = "~/Views/Dashboard/_DashboardLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/tickets.css" />
+}
+
+<div class="ticket-box">
+    <div class="ticket-header">
+        <h1>🎫 Ticket Details</h1>
+        <p>Information for ticket @Model.Id</p>
+    </div>
+
+    <div class="ticket-content">
+        <div class="detail-card">
+            <div class="section-title">📋 Basic Information</div>
+
+            <div class="detail-row">
+                <div class="detail-label">Ticket ID:</div>
+                <div class="detail-value"><strong>@Model.Id</strong></div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Employee ID:</div>
+                <div class="detail-value">@Model.EmployeeID</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Subject:</div>
+                <div class="detail-value">@Model.Subject</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Description:</div>
+                <div class="detail-value">@Model.Description</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Type:</div>
+                <div class="detail-value">@Model.Type</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Priority:</div>
+                <div class="detail-value">@Model.Priority</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value">
+                    <span class="badge badge-@Model.TicketStatus">@Model.TicketStatus</span>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Reported:</div>
+                <div class="detail-value">@Model.DateTimeReport</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Deadline:</div>
+                <div class="detail-value">@Model.Deadline</div>
+            </div>
+        </div>
+
+
+        <div class="detail-card">
+            <div class="section-title">👥 Worked By</div>
+
+            @if (Model.WorkedBy != null && Model.WorkedBy.Any())
+            {
+                foreach (var entry in Model.WorkedBy)
+                {
+                    <div class="worked-by-box">
+                        <div class="grid">
+                            <div><strong>Employee:</strong> @entry.Employee?.Id</div>
+                            <div><strong>To Employee:</strong> @entry.Handover?.ToEmployee</div>
+                            <div><strong>By:</strong> @entry.Handover?.By</div>
+                            <div><strong>Reason:</strong> @entry.Handover?.Why</div>
+                            <div><strong>Assigned:</strong> @entry.Timestamps?.AssignedAt</div>
+                            <div><strong>Handed:</strong> @entry.Timestamps?.HandedAt</div>
+                            <div><strong>Finished:</strong> @entry.Timestamps?.FinishedAt</div>
+                            <div><strong>Active:</strong> @(entry.Active ? "✅ Yes" : "❌ No")</div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="color:#6c757d;">No worked-by history available for this ticket.</p>
+            }
+        </div>
+
+        <div class="actions">
+            @if (loggedInUser?.EmployeeRole == Role.regular)
+            {
+                <a href="@Url.Action("Index", "Dashboard")" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("Index", "Ticket")" class="btn btn-back">← Back to Tickets</a>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-primary">🏠 Home</a>
+            }
+        </div>
+    </div>
+</div>

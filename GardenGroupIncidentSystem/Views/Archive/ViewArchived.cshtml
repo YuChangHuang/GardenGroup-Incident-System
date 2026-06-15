@@ -1,0 +1,370 @@
+﻿@model List<GardenGroupIncidentSystem.Models.Ticket>
+@using GardenGroupIncidentSystem.Models
+@{
+    ViewData["Title"] = "Archived Tickets";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 36px 40px;
+        }
+
+            .header h1 {
+                font-size: 30px;
+                font-weight: 600;
+            }
+
+        .content {
+            padding: 30px 40px;
+        }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeeba;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+            .search-box input {
+                flex: 1;
+                padding: 12px 16px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+            }
+
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all .2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102,126,234,.4);
+            }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            padding: 8px 14px;
+            font-size: 12px;
+        }
+
+            .btn-success:hover {
+                background: #218838;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 14px;
+            text-align: left;
+            font-weight: 700;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .b-pri-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .b-pri-med {
+            background: #fff8e1;
+            color: #ef6c00;
+        }
+
+        .b-pri-low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .b-status-closed {
+            background: #eceff1;
+            color: #546e7a;
+        }
+
+        .b-status-resolved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .muted {
+            color: #6c757d;
+        }
+
+        .cell-mono {
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 12px;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗄️ Archived Tickets</h1>
+            <p style="margin-top:8px;opacity:.95;">Browse and manage tickets that have been moved to archive</p>
+        </div>
+
+        <div class="content">
+            <!-- Hidden anti-forgery token for AJAX requests -->
+            @Html.AntiForgeryToken()
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">✅ @TempData["Success"]</div>
+            }
+
+            <!-- Search Bar -->
+            <form method="get" asp-action="SearchArchived" class="search-box">
+                <input type="text"
+                       name="searchTerm"
+                       placeholder="🔎 Search archived tickets by ID, subject, description, or employee ID..."
+                       value="@ViewBag.SearchTerm" />
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+
+            <!-- Ticket Count Alert -->
+            <div class="alert alert-info">
+                ℹ️ Showing <strong>@Model.Count</strong> archived ticket(s)
+                @if (!string.IsNullOrWhiteSpace(ViewBag.SearchTerm as string))
+                {
+                    <text> matching "@ViewBag.SearchTerm"</text>
+                }
+            </div>
+
+            <!-- Archived Tickets Table -->
+            @if (Model != null && Model.Any())
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Subject</th>
+                            <th>Type</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Reported</th>
+                            <th>Reporter</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model)
+                        {
+                            string priClass = t.Priority?.ToLowerInvariant() switch
+                            {
+                                "high" => "b-pri-high",
+                                "medium" => "b-pri-med",
+                                "low" => "b-pri-low",
+                                _ => "b-pri-med"
+                            };
+
+                            string statusClass = t.TicketStatus switch
+                            {
+                                Status.Resolved => "b-status-resolved",
+                                Status.Closed => "b-status-closed",
+                                _ => "b-status-closed"
+                            };
+
+                            <tr>
+                                <td><strong>@t.Id</strong></td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(t.Subject))
+                                    {
+                                        @t.Subject
+                                    }
+                                    else
+                                    {
+                                        <span class="muted">—</span>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(t.Description))
+                                    {
+                                        <div class="cell-mono" title="@t.Description">
+                                            @((t.Description.Length > 60 ? t.Description.Substring(0, 60) + "…" : t.Description))
+                                        </div>
+                                    }
+                                </td>
+                                <td>@(string.IsNullOrWhiteSpace(t.Type) ? Html.Raw("<span class='muted'>—</span>") : Html.Raw(t.Type))</td>
+                                <td><span class="badge @priClass">@t.Priority</span></td>
+                                <td><span class="badge @statusClass">@t.TicketStatus</span></td>
+                                <td>@t.DateTimeReport.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td class="cell-mono">@t.EmployeeID</td>
+                                <td style="white-space:nowrap;">
+                                    <button class="btn btn-success"
+                                            onclick="restoreTicket('@t.Id', '@t.Subject')"
+                                            title="Restore this ticket to active tickets">
+                                        ↩️ Restore
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    ⚠️ <strong>No archived tickets found.</strong>
+                    @if (!string.IsNullOrWhiteSpace(ViewBag.SearchTerm as string))
+                    {
+                        <text>Try a different search term or <a href="@Url.Action("ViewArchived")">view all archived tickets</a>.</text>
+                    }
+                    else
+                    {
+                        <text>There are no tickets in the archive yet.</text>
+                    }
+                </div>
+            }
+
+            <!-- Back Button -->
+            <div style="margin-top:20px;">
+                <a asp-action="Index" class="btn btn-secondary">← Back to Archive Management</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function restoreTicket(ticketId, ticketSubject) {
+            // Confirmation dialog
+            if (confirm('🔄 Restore ticket ' + ticketId + '?\n\n"' + ticketSubject + '"\n\nThis will move it back to active tickets.')) {
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                if (!token) {
+                    alert('❌ Security token not found. Please refresh the page.');
+                    return;
+                }
+
+                // Create form data
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+
+                // Make AJAX request
+                fetch('/Archive/Restore?id=' + ticketId, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ Ticket restored successfully!');
+                        // Reload page to show updated list
+                        location.reload();
+                    } else {
+                        alert('❌ Error restoring ticket: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Error: ' + error);
+                    console.error('Restore error:', error);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

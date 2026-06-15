@@ -1,0 +1,83 @@
+﻿﻿
+@model GardenGroupIncidentSystem.Models.Employee
+@{
+    ViewData["Title"] = "Edit Employee";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Site styles -->
+    <link rel="stylesheet" href="~/css/employeeEdit.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GardenGroupIncidentSystem.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✏️ Edit Employee — @Model.Id</h1>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                ℹ️ <strong>Password Policy:</strong> Passwords are hashed using SHA256 before storage. Leave “New Password” blank to keep current password.
+            </div>
+
+            <form asp-action="Edit" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input name="firstName" value="@Model.Name?.FirstName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input name="lastName" value="@Model.Name?.LastName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input name="emailAddress" type="email" value="@Model.ContactDetails?.EmailAddress" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input name="phoneNumber" value="@Model.ContactDetails?.PhoneNumber" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input name="location" value="@Model.ContactDetails?.Location" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select name="role" required>
+                            <option value="regular" selected="@(Model.EmployeeRole == GardenGroupIncidentSystem.Models.Role.regular)">Regular</option>
+                            <option value="supervisor" selected="@(Model.EmployeeRole == GardenGroupIncidentSystem.Models.Role.supervisor)">Supervisor</option>
+                            <option value="servicedesk_1" selected="@(Model.EmployeeRole == GardenGroupIncidentSystem.Models.Role.servicedesk_1)">Service Desk 1</option>
+                            <option value="servicedesk_2" selected="@(Model.EmployeeRole == GardenGroupIncidentSystem.Models.Role.servicedesk_2)">Service Desk 2</option>
+                            <option value="servicedesk_3" selected="@(Model.EmployeeRole == GardenGroupIncidentSystem.Models.Role.servicedesk_3)">Service Desk 3</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / span 2;">
+                        <label>New Password (optional)</label>
+                        <input name="newPassword" type="password" placeholder="Leave blank to keep current password" />
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">✅ Save Changes</button>
+                    <a asp-action="Index" class="btn btn-secondary">⬅ Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

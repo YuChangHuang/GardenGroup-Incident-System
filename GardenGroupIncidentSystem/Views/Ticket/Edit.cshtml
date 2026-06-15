@@ -1,0 +1,76 @@
+﻿@model GardenGroupIncidentSystem.Models.Ticket
+@{
+    ViewData["Title"] = "Edit Ticket";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/tickets.css" />
+}
+
+<div class="ticket-edit-container">
+    <h1>🎫 Edit Ticket – @Model.Id</h1>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="message message-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="message message-error">@TempData["Error"]</div>
+    }
+
+    <form asp-action="Edit" asp-controller="Ticket" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-group">
+            <label>Subject</label>
+            <input asp-for="Subject" class="readonly" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea asp-for="Description" rows="3" class="readonly" readonly></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Type</label>
+            <input asp-for="Type" class="readonly" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Priority</label>
+            <input asp-for="Priority" class="readonly" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Current Status</label>
+            <select asp-for="TicketStatus">
+                <option value="Open" selected="@(Model.TicketStatus == GardenGroupIncidentSystem.Models.Status.Open)">Open</option>
+                <option value="Resolved" selected="@(Model.TicketStatus == GardenGroupIncidentSystem.Models.Status.Resolved)">Resolved</option>
+                <option value="Closed" selected="@(Model.TicketStatus == GardenGroupIncidentSystem.Models.Status.Closed)">Closed</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Current Employee</label>
+            <input type="text" value="@(Model.WorkedBy?.LastOrDefault()?.Employee?.Id ?? "N/A")" class="readonly" readonly />
+        </div>
+
+        <hr style="margin: 25px 0;" />
+
+        <div class="form-group">
+            <label>🔄 Handover To (Employee ID)</label>
+            <input type="text" name="HandoverTo" placeholder="Enter employee ID e.g. E0091" />
+        </div>
+
+        <div class="form-group">
+            <label>Reason for Handover</label>
+            <input type="text" name="HandoverReason" placeholder="e.g. Shift change, Escalation" />
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn-save">💾 Save Changes</button>
+            <a href="@Url.Action("Index", "Ticket")" class="btn btn-secondary">← Back to Tickets</a>
+        </div>
+    </form>
+</div>

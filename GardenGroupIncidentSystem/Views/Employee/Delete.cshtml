@@ -1,0 +1,44 @@
+﻿@model GardenGroupIncidentSystem.Models.Employee
+@{
+    ViewData["Title"] = "Delete Employee";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Site styles -->
+    <link rel="stylesheet" href="~/css/employeeDelete.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GardenGroupIncidentSystem.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗑️ Delete Employee — @Model.Id</h1>
+        </div>
+        <div class="content">
+            <div class="warning">
+                ⚠️ <strong>Warning:</strong> This action cannot be undone. Are you sure you want to delete this employee?
+            </div>
+
+            <div class="details">
+                <div class="row"><span class="label">Employee ID:</span> @Model.Id</div>
+                <div class="row"><span class="label">Name:</span> @Model.Name?.FirstName @Model.Name?.LastName</div>
+                <div class="row"><span class="label">Email:</span> @Model.ContactDetails?.EmailAddress</div>
+                <div class="row"><span class="label">Phone:</span> @Model.ContactDetails?.PhoneNumber</div>
+                <div class="row"><span class="label">Location:</span> @Model.ContactDetails?.Location</div>
+                <div class="row"><span class="label">Role:</span> @Model.EmployeeRole.ToString().Replace("_", " ")</div>
+            </div>
+
+            <form asp-action="DeleteConfirmed" method="post" class="actions">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-danger">✅ Yes, Delete</button>
+                <a asp-action="Index" class="btn btn-secondary">❌ Cancel</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

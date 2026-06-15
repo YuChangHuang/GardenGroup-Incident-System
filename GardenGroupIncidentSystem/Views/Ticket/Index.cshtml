@@ -1,0 +1,216 @@
+﻿
+@model List<GardenGroupIncidentSystem.Models.Ticket>
+@using GardenGroupIncidentSystem.Models
+@{
+    ViewData["Title"] = "Tickets";
+    var loggedInUser = Context.Session.GetObject<Employee>("LoggedInUser");
+}
+
+<head>
+     <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Site styles -->
+    <link rel="stylesheet" href="~/css/ticketindex.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GardenGroupIncidentSystem.styles.css" asp-append-version="true" />
+</head>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>🎫 Tickets</h1>
+            <p style="margin-top:8px;opacity:.95;">Index — list, search & filter</p>
+        </div>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.TotalTickets</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.OpenCount</div>
+                <div class="stat-label">Open</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.ResolvedCount</div>
+                <div class="stat-label">Resolved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.ClosedCount</div>
+                <div class="stat-label">Closed</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">✅ @TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error">❌ @TempData["Error"]</div>
+        }
+
+        <div class="actions-bar">
+            <!-- Search & Filters -->
+            <form method="get" asp-action="Index" class="search-box">
+                <input type="text" name="q" value="@ViewBag.Query" placeholder="🔎 Search by Ticket ID, subject, description…">
+                <select name="status">
+                    <option value="all" selected="@(ViewBag.StatusFilter == "all")">All Statuses</option>
+                    <option value="Open" selected="@(ViewBag.StatusFilter == "Open")">Open</option>
+                    <option value="Resolved" selected="@(ViewBag.StatusFilter == "Resolved")">Resolved</option>
+                    <option value="Closed" selected="@(ViewBag.StatusFilter == "Closed")">Closed</option>
+                </select>
+                <select name="priority">
+                    <option value="all" selected="@(ViewBag.PriorityFilter == "all")">All Priorities</option>
+                    <option value="High" selected="@(ViewBag.PriorityFilter == "High")">High</option>
+                    <option value="Medium" selected="@(ViewBag.PriorityFilter == "Medium")">Medium</option>
+                    <option value="Low" selected="@(ViewBag.PriorityFilter == "Low")">Low</option>
+                </select>
+                <select name="type">
+                    <option value="all" selected="@(ViewBag.TypeFilter == "all")">All Types</option>
+                    <option value="Access Request" selected="@(ViewBag.TypeFilter == "Access Request")">Access Request</option>
+                    <option value="Hardware Request" selected="@(ViewBag.TypeFilter == "Hardware Request")">Hardware Request</option>
+                    <option value="Incident" selected="@(ViewBag.TypeFilter == "Incident")">Incident</option>
+                    <option value="Other" selected="@(ViewBag.TypeFilter == "Other")">Other</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+
+            <div style="display:flex; gap:10px;">
+                <a class="btn btn-secondary" href="@Url.Action("Index", "Ticket")">Clear</a>
+                <a class="btn btn-primary" href="@Url.Action("Create", "Ticket")">➕ Create Ticket</a>
+            </div>
+        </div>
+
+        <!-- Tickets table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticket</th>
+                    <th>Subject</th>
+                    <th>Type</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Reported</th>
+                    <th>Deadline</th>
+                    <th>Active Assignees</th>
+                    <th>Reporter</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Count == 0)
+                {
+                    <tr>
+                        <th>Ticket</th>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th>
+                          Priority
+                          <a href="@Url.Action("Index", new {
+                                q = ViewBag.Query,
+                                status = ViewBag.StatusFilter,
+                                priority = ViewBag.PriorityFilter,
+                                type = ViewBag.TypeFilter,
+                                sort = "priority",
+                                dir = (ViewBag.Dir == "asc" ? "desc" : "asc")
+                              })"
+                             title="Sort by priority">
+                             (sort)
+                          </a>
+                        </th>
+
+                        <th>Status</th>
+                        <th>Reported</th>
+                        <th>Deadline</th>
+                        <th>Active Assignees</th>
+                        <th>Reporter</th>
+                        <th>Actions</th>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var t in Model)
+                    {
+                        string priClass = t.Priority?.ToLowerInvariant() switch
+                        {
+                            "high" => "b-pri-high",
+                            "medium" => "b-pri-med",
+                            "low" => "b-pri-low",
+                            _ => "b-pri-med"
+                        };
+
+                        string statusClass = t.TicketStatus switch
+                        {
+                            Status.Open => "b-status-open",
+                            Status.Resolved => "b-status-resolved",
+                            Status.Closed => "b-status-closed",
+                            _ => "b-status-open"
+                        };
+
+                        var activeWorkers = (t.WorkedBy ?? new List<WorkedBy>())
+                        .Where(wb => wb != null && wb.Active)
+                        .ToList();
+
+                        <tr>
+                            <td><strong>@t.Id</strong></td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(t.Subject))
+                                {
+                                    @t.Subject
+                                }
+                                else
+                                {
+                                    <span class="muted">—</span>
+                                }
+                                <div class="cell-mono" title="@t.Description">@((t.Description ?? "").Length > 90 ? (t.Description.Substring(0, 90) + "…") : t.Description)</div>
+                            </td>
+                            <td>@(string.IsNullOrWhiteSpace(t.Type) ? Html.Raw("<span class='muted'>—</span>") : Html.Raw(t.Type))</td>
+                            <td><span class="badge @priClass">@t.Priority</span></td>
+                            <td><span class="badge @statusClass">@t.TicketStatus</span></td>
+                            <td>
+                                @t.DateTimeReport.ToString("yyyy-MM-dd HH:mm")
+                            </td>
+                            <td>
+                                @t.Deadline.ToString("yyyy-MM-dd HH:mm")
+                            </td>
+                            <td>
+                                @if (activeWorkers.Count == 0)
+                                {
+                                    <span class="muted">No active assignee</span>
+                                }
+                                else
+                                {
+                                    <div class="assignees">
+                                        @foreach (var wb in activeWorkers)
+                                        {
+                                            var name = wb.Employee?.Name != null
+                                            ? $"{wb.Employee.Name.FirstName} {wb.Employee.Name.LastName}"
+                                            : (wb.Employee?.Id ?? "Employee");
+                                            <span class="assignee-chip">@name</span>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                            <td class="cell-mono">@t.EmployeeID</td>
+                            <td style="white-space:nowrap;">
+                                <a href="@Url.Action("Details", "Ticket", new { id = t.Id })" class="btn btn-info">👁️ Details</a>
+
+                                @if (loggedInUser?.EmployeeRole != Role.regular)
+                                {
+                                    <a href="@Url.Action("Edit", "Ticket", new { id = t.Id })" class="btn btn-warning">✏️ Edit</a>
+                                    <form asp-action="Delete" asp-controller="Ticket" method="post" style="display:inline" onsubmit="return confirm('Delete ticket @t.Id?');">
+                                        <input type="hidden" name="id" value="@t.Id" />
+                                        <button type="submit" class="btn btn-danger">🗑️ Delete</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

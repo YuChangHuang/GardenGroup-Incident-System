@@ -1,0 +1,283 @@
+﻿@model List<GardenGroupIncidentSystem.Models.Ticket>
+@using GardenGroupIncidentSystem.Models
+@{
+    ViewData["Title"] = "Preview Archivable Tickets";
+    var cutoffDate = ViewBag.CutoffDate as DateTime?;
+    var years = ViewBag.Years as int?;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 36px 40px;
+        }
+
+            .header h1 {
+                font-size: 30px;
+                font-weight: 600;
+            }
+
+        .content {
+            padding: 30px 40px;
+        }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeeba;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all .2s;
+            margin-right: 10px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+            .btn-secondary:hover {
+                background: #5a6268;
+            }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+            .btn-warning:hover {
+                background: #e0a800;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 14px;
+            text-align: left;
+            font-weight: 700;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .b-pri-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .b-pri-med {
+            background: #fff8e1;
+            color: #ef6c00;
+        }
+
+        .b-pri-low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .b-status-closed {
+            background: #eceff1;
+            color: #546e7a;
+        }
+
+        .b-status-resolved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .muted {
+            color: #6c757d;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👁️ Preview Archivable Tickets</h1>
+            <p style="margin-top:8px;opacity:.95;">Preview tickets before moving them to archive</p>
+        </div>
+
+        <div class="content">
+            <!-- Warning Alert -->
+            <div class="alert alert-warning">
+                ⚠️ <strong>Preview Mode</strong><br />
+                These are the tickets that will be archived if you proceed.<br />
+                <strong>Criteria:</strong> Tickets reported before <strong>@cutoffDate?.ToString("yyyy-MM-dd")</strong> that are Closed or Resolved.
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                <!-- Info Alert -->
+                <div class="alert alert-info">
+                    ℹ️ Showing <strong>@Model.Count</strong> ticket(s) that will be archived
+                    @if (Model.Count == 100)
+                    {
+                        <text> (limited to 100 for preview - more may exist)</text>
+                    }
+                </div>
+
+                <!-- Preview Table -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Type</th>
+                            <th>Reported Date</th>
+                            <th>Age (Years)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model)
+                        {
+                            var age = (DateTime.Now - t.DateTimeReport).Days / 365.0;
+                            string statusClass = t.TicketStatus == Status.Resolved ? "b-status-resolved" : "b-status-closed";
+
+                            string priClass = t.Priority?.ToLowerInvariant() switch
+                            {
+                                "high" => "b-pri-high",
+                                "medium" => "b-pri-med",
+                                "low" => "b-pri-low",
+                                _ => "b-pri-med"
+                            };
+
+                            <tr>
+                                <td><strong>@t.Id</strong></td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(t.Subject))
+                                    {
+                                        @t.Subject
+                                    }
+                                    else
+                                    {
+                                        <span class="muted">No subject</span>
+                                    }
+                                </td>
+                                <td><span class="badge @statusClass">@t.TicketStatus</span></td>
+                                <td><span class="badge @priClass">@t.Priority</span></td>
+                                <td>@(string.IsNullOrWhiteSpace(t.Type) ? "—" : t.Type)</td>
+                                <td>@t.DateTimeReport.ToString("yyyy-MM-dd")</td>
+                                <td>@age.ToString("0.0") years old</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Action Buttons -->
+                <div class="actions">
+                    <form method="post" asp-action="ArchiveByDate" asp-controller="Archive" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="cutoffDate" value="@cutoffDate?.ToString("yyyy-MM-dd")" />
+                        <button type="submit"
+                                class="btn btn-warning"
+                                onclick="return confirm('⚠️ Proceed with archiving @Model.Count ticket(s)?\n\nThey will be moved to the ArchivedTickets collection.\n\nYou can restore them later if needed.')">
+                            🗄️ Proceed with Archiving (@Model.Count tickets)
+                        </button>
+                    </form>
+                    <a asp-action="Index" class="btn btn-secondary">← Cancel &amp; Go Back</a>
+                </div>
+            }
+            else
+            {
+                <!-- No Tickets Alert -->
+                <div class="alert alert-success">
+                    ✅ <strong>No tickets to archive</strong><br />
+                    There are no closed or resolved tickets before <strong>@cutoffDate?.ToString("yyyy-MM-dd")</strong>.
+                </div>
+
+                <a asp-action="Index" class="btn btn-secondary">← Back to Archive Management</a>
+            }
+        </div>
+    </div>
+</body>
+</html>

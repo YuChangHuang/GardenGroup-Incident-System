@@ -1,0 +1,133 @@
+﻿@{
+    ViewData["Title"] = "My Ticket Dashboard";
+    var filteredTickets = ViewBag.FilteredTickets as List<GardenGroupIncidentSystem.Models.Ticket>;
+    string activeFilter = ViewBag.ActiveFilter ?? "all";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/dashboard.css" />
+}
+@{
+    Layout = "~/Views/Dashboard/_DashboardLayout.cshtml";
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="box-container">
+    <h2>My Ticket Dashboard</h2>
+
+    @if (ViewBag.Message != null)
+    {
+        <p>@ViewBag.Message</p>
+    }
+    else
+    {
+        <div style="margin-bottom: 20px;">
+            <a class="btn btn-primary" href="@Url.Action("Create", "Ticket")"
+               style="padding: 10px 20px; font-weight: 600; border-radius: 8px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none;">
+                Create New Ticket
+            </a>
+        </div>
+
+        <!-- Summary Cards & Pie Chart -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap;">
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <a href="@Url.Action("Index", "Dashboard", new { statusFilter = "all" })" class="summary-card @(activeFilter == "all" ? "active" : "")">
+                    <span class="summary-label">Total</span>
+                    <span class="summary-count">@ViewBag.Total</span>
+                    <span class="summary-percent">100%</span>
+                </a>
+                <a href="@Url.Action("Index", "Dashboard", new { statusFilter = "Open" })" class="summary-card @(activeFilter == "Open" ? "active" : "")">
+                    <span class="summary-label">Open</span>
+                    <span class="summary-count">@ViewBag.OpenCount</span>
+                    <span class="summary-percent">@ViewBag.PercentOpen%</span>
+                </a>
+                <a href="@Url.Action("Index", "Dashboard", new { statusFilter = "Resolved" })" class="summary-card @(activeFilter == "Resolved" ? "active" : "")">
+                    <span class="summary-label">Resolved</span>
+                    <span class="summary-count">@ViewBag.ResolvedCount</span>
+                    <span class="summary-percent">@ViewBag.PercentResolved%</span>
+                </a>
+                <a href="@Url.Action("Index", "Dashboard", new { statusFilter = "Closed" })" class="summary-card @(activeFilter == "Closed" ? "active" : "")">
+                    <span class="summary-label">Closed Not Resolved</span>
+                    <span class="summary-count">@ViewBag.ClosedCount</span>
+                    <span class="summary-percent">@ViewBag.PercentClosed%</span>
+                </a>
+            </div>
+
+            <div style="flex: 1; max-width: 400px; min-width: 300px;">
+                <canvas id="ticketPieChart" height="300"></canvas>
+            </div>
+        </div>
+
+        @if (filteredTickets != null && filteredTickets.Any())
+        {
+            <h4 style="margin-top: 30px;">Filtered Tickets (@activeFilter)</h4>
+            <table class="table table-striped table-hoverable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Reported</th>
+                        <th>Deadline</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ticket in filteredTickets)
+                    {
+                        <tr style="cursor:pointer;" data-url="@Url.Action("Details", "Ticket", new { id = ticket.Id })">
+                            <td>@ticket.Id</td>
+                            <td>@ticket.Subject</td>
+                            <td>@ticket.TicketStatus</td>
+                            <td>@ticket.Priority</td>
+                            <td>@ticket.DateTimeReport.ToShortDateString()</td>
+                            <td>@ticket.Deadline.ToShortDateString()</td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        }
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('ticketPieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Open', 'Resolved', 'Closed'],
+                    datasets: [{
+                        label: 'Ticket Distribution',
+                        data: [@ViewBag.OpenCount, @ViewBag.ResolvedCount, @ViewBag.ClosedCount],
+                        backgroundColor: ['#f39c12', '#27ae60', '#c0392b'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#333',
+                                font: { size: 14 }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Ticket Status Overview',
+                            font: { size: 18 }
+                        }
+                    }
+                }
+            });
+                    document.querySelectorAll('tr[data-url]').forEach(row => {
+                row.addEventListener('click', () => {
+                    window.location.href = row.dataset.url;
+                });
+            });
+        </script>
+    }
+</div>

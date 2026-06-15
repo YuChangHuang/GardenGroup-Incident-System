@@ -1,0 +1,223 @@
+﻿@model List<GardenGroupIncidentSystem.Models.Employee>
+@{
+    ViewData["Title"] = "Employee Management";
+}
+
+<head>
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Site styles -->
+    <link rel="stylesheet" href="~/css/employeeIndex.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GardenGroupIncidentSystem.styles.css" asp-append-version="true" />
+</head>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>👥 Employee Management</h1>
+            
+        </div>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.TotalCount</div>
+                <div class="stat-label">Total Employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.RegularCount</div>
+                <div class="stat-label">Regular</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.ServiceDeskCount</div>
+                <div class="stat-label">Service Desk</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                ✅ @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error">
+                ❌ @TempData["Error"]
+            </div>
+        }
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-error">
+                ❌ @ViewBag.Error
+            </div>
+        }
+
+        <!-- Toggle Create Form Button -->
+        <button class="toggle-btn" onclick="toggleForm()">➕ Create New Employee</button>
+
+        <!-- Create Employee Form -->
+        <div id="createForm" class="create-form form-hidden">
+            <h3 style="margin-bottom: 10px; color: #495057;">Create New Employee</h3>
+            <div class="info-note">
+                ℹ️ <strong>Auto-Generated ID:</strong> Employee ID will be automatically generated (e.g., E0102, E0103). You don't need to provide it!
+            </div>
+            <form method="post" asp-action="Create">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>First Name <span class="required">*</span></label>
+                        <input type="text" name="firstName" placeholder="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name <span class="required">*</span></label>
+                        <input type="text" name="lastName" placeholder="Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email <span class="required">*</span></label>
+                        <input type="email" name="email" placeholder="john.doe@gardengroup.example" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" name="phone" placeholder="+31 612345678">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" placeholder="Amsterdam">
+                    </div>
+                    <div class="form-group">
+                        <label>Role <span class="required">*</span></label>
+                        <select name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="regular">Regular</option>
+                            <option value="supervisor">Supervisor</option>
+                            <option value="servicedesk_1">Service Desk 1</option>
+                            <option value="servicedesk_2">Service Desk 2</option>
+                            <option value="servicedesk_3">Service Desk 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Password <span class="required">*</span></label>
+                        <input type="password" name="password" placeholder="Enter password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">✅ Create Employee</button>
+            </form>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="actions-bar" style="margin-top: 30px;">
+            <form method="get" asp-action="Search" class="search-box">
+                <input type="text" name="searchTerm" placeholder="🔍 Search by ID, name, or email..." value="@ViewBag.SearchTerm">
+                <select name="roleFilter">
+                    <option value="all">All Roles</option>
+                    <option value="regular" selected="@(ViewBag.RoleFilter == "regular")">Regular</option>
+                    <option value="supervisor" selected="@(ViewBag.RoleFilter == "supervisor")">Supervisor</option>
+                    <option value="servicedesk_1" selected="@(ViewBag.RoleFilter == "servicedesk_1")">Service Desk 1</option>
+                    <option value="servicedesk_2" selected="@(ViewBag.RoleFilter == "servicedesk_2")">Service Desk 2</option>
+                    <option value="servicedesk_3" selected="@(ViewBag.RoleFilter == "servicedesk_3")">Service Desk 3</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+            <a href="@Url.Action("Index", "Employee")" class="btn btn-secondary">Clear</a>
+        </div>
+
+        <!-- Employee List -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Location</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #6c757d;">
+                            No employees found.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var employee in Model)
+                    {
+                        <tr>
+                            <td><strong>@employee.Id</strong></td>
+                            <td>
+                                @if (employee.Name != null)
+                                {
+                                    @employee.Name.FirstName @employee.Name.LastName
+                                }
+                                else
+                                {
+                                    <span style="color: #6c757d;">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (employee.ContactDetails != null && !string.IsNullOrEmpty(employee.ContactDetails.EmailAddress))
+                                {
+                                    @employee.ContactDetails.EmailAddress
+                                }
+                                else
+                                {
+                                    <span style="color: #6c757d;">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (employee.ContactDetails != null && !string.IsNullOrEmpty(employee.ContactDetails.Location))
+                                {
+                                    @employee.ContactDetails.Location
+                                }
+                                else
+                                {
+                                    <span style="color: #6c757d;">N/A</span>
+                                }
+                            </td>
+                            <td>
+                                @if (employee.EmployeeRole == GardenGroupIncidentSystem.Models.Role.regular)
+                                {
+                                    <span class="badge badge-regular">Regular</span>
+                                }
+                                else if (employee.EmployeeRole == GardenGroupIncidentSystem.Models.Role.supervisor)
+                                {
+                                    <span class="badge badge-supervisor">Supervisor</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-service-desk">@employee.EmployeeRole.ToString().Replace("_", " ")</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="@Url.Action("Details", "Employee", new { id = employee.Id })" class="btn btn-info">
+                                    👁️ View Details
+                                </a>
+                                <a href="@Url.Action("Edit", "Employee", new { id = employee.Id })" class="btn btn-warning">✏️ Edit</a>
+                                <a href="@Url.Action("Delete", "Employee", new { id = employee.Id })" class="btn btn-danger">🗑️ Delete</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleForm() {
+        var form = document.getElementById('createForm');
+        if (form.classList.contains('form-hidden')) {
+            form.classList.remove('form-hidden');
+        } else {
+            form.classList.add('form-hidden');
+        }
+    }
+</script>

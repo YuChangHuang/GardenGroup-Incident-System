@@ -1,0 +1,124 @@
+﻿
+:root {
+    --gg-primary: #667eea;
+    --gg-secondary: #764ba2;
+    --gg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gg-success: #10b981;
+    --gg-warning: #f59e0b;
+    --gg-danger: #ef4444;
+}
+
+[data-bs-theme="dark"] {
+    --gg-primary: #818cf8;
+    --gg-secondary: #a78bfa;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--bs-body-bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.gg-navbar {
+    background: var(--gg-gradient);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    .gg-navbar .nav-link,
+    .gg-navbar .navbar-brand {
+        color: rgba(255, 255, 255, 0.95) !important;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .gg-navbar .nav-link:hover {
+            color: #fff !important;
+            transform: translateY(-1px);
+        }
+
+        .gg-navbar .nav-link.active {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+        }
+
+.navbar-brand {
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+    .navbar-brand i {
+        font-size: 1.5rem;
+    }
+
+#themeToggle {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+    #themeToggle:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+.user-dropdown .dropdown-toggle {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    transition: all 0.3s ease;
+}
+
+    .user-dropdown .dropdown-toggle:hover {
+        background: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+main {
+    flex: 1;
+}
+
+footer {
+    background: var(--bs-secondary-bg);
+    margin-top: auto;
+}
+
+/* Card enhancements */
+.card {
+    border: 1px solid var(--bs-border-color);
+    transition: all 0.3s ease;
+}
+
+.card-raise:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styles */
+.btn-gg {
+    background: var(--gg-gradient);
+    color: white;
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+    .btn-gg:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+
+/* Smooth transitions */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
