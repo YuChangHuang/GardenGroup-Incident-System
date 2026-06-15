@@ -6,7 +6,8 @@ services:
     environment:
       MONGO_INITDB_DATABASE: GardenGrup
     ports:
-      - "27017:27017"
+      # Host port 27018 to avoid clashing with a locally-installed MongoDB on 27017
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
       # Seed scripts run automatically the first time the container starts
